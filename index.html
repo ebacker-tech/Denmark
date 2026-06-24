@@ -818,8 +818,7 @@ renderDay(currentDay);
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    const swPath = location.pathname.replace(/\/[^/]*$/, '/sw.js');
-    navigator.serviceWorker.register(swPath).catch(() => {});
+    navigator.serviceWorker.register('/Denmark/sw.js').catch(() => {});
   });
 }
 </script>
