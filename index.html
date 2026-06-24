@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#C8102E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Denmark">
+<title>Denmark Trip</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.svg">
+<style>
+  :root {
+    --red: #C8102E;
+    --red-dark: #9E0B23;
+    --red-light: #F5D5DA;
+    --red-mid: #E8667A;
+    --white: #FFFFFF;
+    --off-white: #FDF8F8;
+    --bg: #FAF2F3;
+    --ink: #1C0508;
+    --ink-mid: #4A1520;
+    --ink-light: #8A5560;
+    --border: rgba(200,16,46,0.12);
+    --border-strong: rgba(200,16,46,0.25);
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100dvh;
+    overscroll-behavior: none;
+  }
+
+  /* HEADER */
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--red);
+    color: var(--white);
+    padding: env(safe-area-inset-top, 0) 0 0;
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
+  }
+  .header-title {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .header-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 1px;
+  }
+  .header-dates {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    text-align: right;
+  }
+
+  /* DAY TABS */
+  .day-tabs {
+    background: var(--red);
+    padding: 0 16px 12px;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .day-tabs::-webkit-scrollbar { display: none; }
+
+  .day-tab {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.18);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: rgba(255,255,255,0.65);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .day-tab .tab-day { font-size: 10px; display: block; }
+  .day-tab .tab-date { font-weight: 600; }
+  .day-tab.active {
+    background: var(--white);
+    color: var(--red);
+  }
+  .day-tab.today-tab {
+    border: 1.5px solid rgba(255,255,255,0.9);
+  }
+
+  /* MAIN CONTENT */
+  .main { padding: 16px 16px 100px; max-width: 600px; margin: 0 auto; }
+
+  /* DAY HERO */
+  .day-hero {
+    background: var(--red);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 14px;
+    color: var(--white);
+  }
+  .day-hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .day-hero-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 3px;
+  }
+  .day-hero-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  .day-hero-hotel {
+    background: rgba(255,255,255,0.15);
+    border-radius: 6px;
+    padding: 5px 9px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.8);
+    white-space: nowrap;
+    margin-left: 12px;
+    flex-shrink: 0;
+  }
+  .day-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .day-tag {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.85);
+  }
+  .day-tag.swim { background: rgba(255,255,255,0.25); }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-light);
+    padding: 14px 0 6px;
+  }
+
+  /* ENTRY CARDS */
+  .entry-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    position: relative;
+  }
+  .entry-card:active { opacity: 0.7; }
+  .entry-card.swim-card {
+    border-color: var(--border-strong);
+    background: var(--off-white);
+  }
+  .entry-card.anchor-card {
+    border-left: 3px solid var(--red);
+  }
+  .entry-card.done {
+    opacity: 0.45;
+  }
+  .entry-card.done .entry-name {
+    text-decoration: line-through;
+    color: var(--ink-light);
+  }
+
+  .entry-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    background: var(--red-light);
+  }
+
+  .entry-body { flex: 1; min-width: 0; }
+  .entry-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.3;
+    margin-bottom: 2px;
+    transition: color 0.15s;
+  }
+  .entry-note {
+    font-size: 12px;
+    color: var(--ink-light);
+    line-height: 1.4;
+  }
+  .entry-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    margin-top: 5px;
+    font-weight: 500;
+  }
+  .badge-swim { background: var(--red-light); color: var(--red-dark); }
+  .badge-booked { background: var(--red); color: var(--white); }
+  .badge-transit { background: #F0EEF0; color: #555; }
+  .badge-bakery { background: #FFF3E0; color: #B35C00; }
+
+  /* CHECKMARK */
+  .check-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-strong);
+    background: none;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 2px;
+  }
+  .entry-card.done .check-btn {
+    background: var(--red);
+    border-color: var(--red);
+  }
+  .check-icon {
+    width: 12px;
+    height: 12px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .entry-card.done .check-icon { opacity: 1; }
+
+  /* SWIM REFERENCE */
+  .swim-panel {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border-strong);
+    padding: 14px;
+    margin-bottom: 8px;
+  }
+  .swim-panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--red);
+    margin-bottom: 10px;
+  }
+  .swim-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 13px;
+  }
+  .swim-row:last-child { border-bottom: none; }
+  .swim-name { flex: 1; color: var(--ink); font-weight: 500; }
+  .swim-city { font-size: 11px; color: var(--red); min-width: 40px; }
+  .swim-when { font-size: 11px; color: var(--ink-light); }
+  .swim-tip { font-size: 11px; color: var(--ink-light); margin-top: 10px; padding-top: 10px; border-top: 0.5px solid var(--border); line-height: 1.4; }
+
+  /* RESTAURANT PANEL */
+  .resto-panel {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .resto-panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--red);
+    padding: 12px 14px 8px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .resto-group { padding: 10px 14px; border-bottom: 0.5px solid var(--border); }
+  .resto-group:last-child { border-bottom: none; }
+  .resto-group-label { font-size: 11px; font-weight: 600; color: var(--ink-mid); margin-bottom: 4px; }
+  .resto-group-items { font-size: 12px; color: var(--ink-light); line-height: 1.6; }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    padding: 0 0 env(safe-area-inset-bottom, 0);
+    display: flex;
+    border-top: 0.5px solid var(--border);
+    z-index: 100;
+  }
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 4px 12px;
+    background: none;
+    border: none;
+    color: var(--ink-light);
+    font-size: 10px;
+    cursor: pointer;
+    transition: color 0.15s;
+    gap: 4px;
+  }
+  .nav-btn.active { color: var(--red); }
+  .nav-btn svg { width: 22px; height: 22px; }
+
+  /* VIEWS */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* OVERVIEW */
+  .overview-day {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    margin-bottom: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.12s;
+  }
+  .overview-day:active { transform: scale(0.98); }
+  .overview-day-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+  .overview-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--red);
+    color: var(--white);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 9px;
+    line-height: 1.2;
+    font-weight: 600;
+  }
+  .overview-dot .d-num { font-size: 15px; line-height: 1; }
+  .overview-day-info { flex: 1; }
+  .overview-day-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .overview-day-sub { font-size: 11px; color: var(--ink-light); margin-top: 1px; }
+  .overview-day-chips {
+    display: flex;
+    gap: 4px;
+    padding: 0 14px 10px;
+    flex-wrap: wrap;
+  }
+  .overview-chip {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: var(--bg);
+    color: var(--ink-mid);
+  }
+  .overview-chip.swim { background: var(--red-light); color: var(--red-dark); }
+  .overview-chip.anchor { background: var(--red); color: var(--white); }
+  .overview-chip.transit { background: #F0EEF0; color: #555; }
+
+  .today-marker {
+    font-size: 10px;
+    background: var(--red);
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-weight: 600;
+    margin-left: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="header-inner">
+    <div>
+      <div class="header-title">🇩🇰 Denmark</div>
+      <div class="header-sub">Copenhagen · Aarhus</div>
+    </div>
+    <div class="header-dates">Jun 25 – Jul 1</div>
+  </div>
+  <div class="day-tabs" id="dayTabs"></div>
+</div>
+
+<div class="main">
+  <div class="view active" id="view-schedule">
+    <div id="dayContent"></div>
+  </div>
+
+  <div class="view" id="view-overview">
+    <div id="overviewContent"></div>
+  </div>
+
+  <div class="view" id="view-swim">
+    <div class="swim-panel" style="margin-top:4px">
+      <div class="swim-panel-title">🌊 All swim spots</div>
+      <div class="swim-row"><span class="swim-name">Sandkaj (Nordhavn)</span><span class="swim-city">CPH</span><span class="swim-when">Thu</span></div>
+      <div class="swim-row"><span class="swim-name">Islands Brygge Havnebad</span><span class="swim-city">CPH</span><span class="swim-when">Fri</span></div>
+      <div class="swim-row"><span class="swim-name">La Banchina</span><span class="swim-city">CPH</span><span class="swim-when">Sat AM</span></div>
+      <div class="swim-row"><span class="swim-name">Den Permanente</span><span class="swim-city">Aarhus</span><span class="swim-when">Sat PM</span></div>
+      <div class="swim-row"><span class="swim-name">Ballehage Beach + Infinity Bridge</span><span class="swim-city">Aarhus</span><span class="swim-when">Sun</span></div>
+      <div class="swim-row"><span class="swim-name">Moesgård Beach (optional)</span><span class="swim-city">Aarhus</span><span class="swim-when">Sun</span></div>
+      <div class="swim-row"><span class="swim-name">Bellevue Strand</span><span class="swim-city">Aarhus</span><span class="swim-when">Mon AM</span></div>
+      <div class="swim-row"><span class="swim-name">Halvandet beach bar</span><span class="swim-city">CPH</span><span class="swim-when">Mon PM</span></div>
+      <div class="swim-row"><span class="swim-name">Charlottenlund Sea Bath</span><span class="swim-city">CPH</span><span class="swim-when">Tue</span></div>
+      <div class="swim-row"><span class="swim-name">Bellevue Beach (Jacobsen towers)</span><span class="swim-city">CPH</span><span class="swim-when">Tue</span></div>
+      <div class="swim-tip">🌡 Water ~16–18°C in late June. Check the <strong>Badevand app</strong> for real-time quality flags before heading out.</div>
+    </div>
+
+    <div class="resto-panel" style="margin-top:8px">
+      <div class="resto-panel-title">🍽 Restaurants</div>
+      <div class="resto-group">
+        <div class="resto-group-label">Already booked ✓</div>
+        <div class="resto-group-items">Seaside Toldboden (Fri 7:30pm) · Sanchez (Mon 8pm)</div>
+      </div>
+      <div class="resto-group">
+        <div class="resto-group-label">Fine dining — book months ahead</div>
+        <div class="resto-group-items">Geranium · Kadeau · Jordnær · AOC · Restaurant Koan</div>
+      </div>
+      <div class="resto-group">
+        <div class="resto-group-label">Book 1–2 weeks ahead</div>
+        <div class="resto-group-items">Host · Barr · Kodbyens Fiskebar · Mark · Selma · Palaegade · Koefoed · Restaurant Alf · Nordic · Admiralgade 26</div>
+      </div>
+      <div class="resto-group">
+        <div class="resto-group-label">Walk-in friendly</div>
+        <div class="resto-group-items">Gasoline Grill · Mikkeller Warpigs · Barabba · Halvandet · Seaside CPH · Aamans</div>
+      </div>
+      <div class="resto-group">
+        <div class="resto-group-label">Bakeries — Copenhagen</div>
+        <div class="resto-group-items">Kong Hans (secret hole-in-the-wall!) · Juno the Bakery · Hart Bageri · Anderson & Maillard</div>
+      </div>
+      <div class="resto-group">
+        <div class="resto-group-label">Bakeries — Aarhus</div>
+        <div class="resto-group-items">Apotek 57 · Lille Bakery · Rug Bakery · Skt. Peders Bakery · Buka · Anderson & Maillard</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="switchView('schedule', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Day
+  </button>
+  <button class="nav-btn" onclick="switchView('overview', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+    All days
+  </button>
+  <button class="nav-btn" onclick="switchView('swim', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M12 3a3 3 0 0 1 3 3l-3 3-3-3a3 3 0 0 1 3-3z"/></svg>
+    Swim & Eat
+  </button>
+</nav>
+
+<script>
+const DAYS = [
+  {
+    id: 0, short: 'Thu', date: '25', month: 'Jun',
+    label: 'Thursday, June 25', title: 'Copenhagen', sub: 'Arrival · solo day', hotel: 'citizenM',
+    chips: [{ label: 'Arriving 8:45am', type: '' }, { label: 'Swim: Sandkaj', type: 'swim' }],
+    sections: [
+      { label: 'Morning', entries: [
+        { icon: '✈️', name: 'Arrive Copenhagen', note: 'Drop bags at citizenM, get oriented', type: '' },
+        { icon: '🏠', name: 'Illums Bolighus', note: 'Flagship design store — opens ~10am', type: '' },
+        { icon: '🪑', name: 'HAY House', note: 'Just around the corner from Illums — do both together', type: '' },
+      ]},
+      { label: 'Afternoon', entries: [
+        { icon: '🏺', name: 'Studio Arhoj', note: 'Ceramics — call ahead to confirm hours', type: '' },
+        { icon: '🌊', name: 'Sandkaj harbour bath — Nordhavn', note: 'Late afternoon dip — very local vibe, easy from center', type: 'swim', badge: 'swim' },
+      ]},
+      { label: 'Dinner', entries: [
+        { icon: '🍽', name: 'Aamans', note: 'Classic open-faced smørrebrød', type: '' },
+        { icon: '👗', name: 'Gina Tricot', note: 'If you want it — before dinner', type: '' },
+      ]}
+    ]
+  },
+  {
+    id: 1, short: 'Fri', date: '26', month: 'Jun',
+    label: 'Friday, June 26', title: 'Copenhagen', sub: 'Molly arrives', hotel: 'citizenM',
+    chips: [{ label: 'Molly 10:30am', type: '' }, { label: 'Boat tour', type: '' }, { label: 'Swim: Islands Brygge', type: 'swim' }, { label: 'Seaside Toldboden 7:30pm', type: 'anchor' }],
+    sections: [
+      { label: 'Morning', entries: [
+        { icon: '✈️', name: 'Molly arrives', note: 'Meet at hotel or airport', type: '' },
+        { icon: '☕', name: 'Kong Hans Bakery', note: 'Secret hole-in-the-wall — perfect first morning stop together', badge: 'bakery', type: '' },
+        { icon: '⛵', name: 'Boat tour', note: 'Great city orientation — book ahead', type: '' },
+      ]},
+      { label: 'Afternoon', entries: [
+        { icon: '🌊', name: 'Islands Brygge Havnebad', note: 'Central harbour bath — grassy lawn, diving platform, lifeguards Jun–Aug', badge: 'swim', type: 'swim' },
+        { icon: '🛍', name: 'Shopping — Another Nue, Norr, Boii', note: 'Cluster by neighborhood', type: '' },
+        { icon: '🎡', name: 'Tivoli Gardens', note: 'Save for after dinner — magical at night', type: '' },
+      ]},
+      { label: 'Evening', entries: [
+        { icon: '🌅', name: 'Seaside Toldboden', note: 'Waterfront dinner', badge: 'booked', type: 'anchor' },
+      ]}
+    ]
+  },
+  {
+    id: 2, short: 'Sat', date: '27', month: 'Jun',
+    label: 'Saturday, June 27', title: 'CPH → Aarhus', sub: 'Train day', hotel: 'Royal Boutique Hotel',
+    chips: [{ label: 'Flea markets', type: '' }, { label: 'Swim: La Banchina', type: 'swim' }, { label: 'Train ~3h43m', type: 'transit' }, { label: 'Swim: Den Permanente', type: 'swim' }],
+    sections: [
+      { label: 'Morning — Copenhagen', entries: [
+        { icon: '🛍', name: 'Saturday flea markets', note: 'Collectors Cage — check for Nørreport/Frederiksberg markets too', type: '' },
+        { icon: '☕', name: 'Juno the Bakery or Hart Bageri', note: 'One last legendary pastry before leaving Copenhagen', badge: 'bakery', type: '' },
+        { icon: '🌊', name: 'La Banchina', note: 'Small dock near Christianshavn — quick dip + coffee. Arrive early, gets crowded.', badge: 'swim', type: 'swim' },
+      ]},
+      { label: 'Transit', entries: [
+        { icon: '🚂', name: 'Train to Aarhus', note: 'Leaves every hour — aim for midday, arrive ~3:30–4pm', badge: 'transit', type: '' },
+      ]},
+      { label: 'Afternoon — Aarhus', entries: [
+        { icon: '🏨', name: 'Check in · Royal Boutique Hotel', type: '' },
+        { icon: '🎨', name: 'Møllestien', note: 'The most colorful street in Aarhus — short walk from center', type: '' },
+        { icon: '🌿', name: 'Sailing rooftop garden', note: 'Inside the Sailing department store — check closing time', type: '' },
+        { icon: '🌊', name: 'Den Permanente', note: 'Historic bathing center close to city center — lovely evening wind-down', badge: 'swim', type: 'swim' },
+      ]},
+      { label: 'Dinner', entries: [
+        { icon: '🍽', name: 'Apotek 57', note: '', type: '' },
+      ]}
+    ]
+  },
+  {
+    id: 3, short: 'Sun', date: '28', month: 'Jun',
+    label: 'Sunday, June 28', title: 'Aarhus', sub: 'Full day · Museum + beaches', hotel: 'Royal Boutique Hotel',
+    chips: [{ label: 'ARoS 3:30am!', type: 'anchor' }, { label: 'Swim: Ballehage', type: 'swim' }, { label: 'Swim: Moesgård', type: 'swim' }],
+    sections: [
+      { label: 'Very early ⚠️', entries: [
+        { icon: '🌙', name: 'James Turrell Experience · ARoS', note: 'Set an alarm — worth every bit of the early wake', badge: 'booked', type: 'anchor' },
+        { icon: '😴', name: 'Nap / rest', note: '', type: '' },
+      ]},
+      { label: 'Late morning', entries: [
+        { icon: '🖼', name: 'ARoS Museum', note: 'Plan 2–3 hours', type: '' },
+        { icon: '🍽', name: 'Lunch — Buka or Latin Quarter', note: '', type: '' },
+      ]},
+      { label: 'Afternoon', entries: [
+        { icon: '🚶', name: 'Walk the Latin Quarter', type: '' },
+        { icon: '📚', name: 'Dokk1', note: 'Stunning waterfront library / cultural center', type: '' },
+        { icon: '🏗', name: 'Iceberg apartment building', note: 'Cool architecture — walk or short taxi', type: '' },
+      ]},
+      { label: 'Late afternoon — beach excursion south (~30 min by bus)', entries: [
+        { icon: '🌊', name: 'Ballehage Beach + Infinity Bridge', note: 'Sandy beach with bathing jetty right next to the bridge. Bring a towel.', badge: 'swim', type: 'swim' },
+        { icon: '🌊', name: 'Moesgård Beach (optional add-on)', note: 'Forest beach in same direction — snack bar on site, lifeguards in summer', badge: 'swim', type: 'swim' },
+      ]},
+      { label: 'Evening', entries: [
+        { icon: '🦌', name: 'Marselisborg Deer Park', note: 'Quiet evening walk — near the beach excursion area', type: '' },
+      ]}
+    ]
+  },
+  {
+    id: 4, short: 'Mon', date: '29', month: 'Jun',
+    label: 'Monday, June 29', title: 'Aarhus → Copenhagen', sub: 'Train day', hotel: 'Hotel SP34',
+    chips: [{ label: 'Swim: Bellevue', type: 'swim' }, { label: 'Train ~3h40m', type: 'transit' }, { label: 'Design Museum', type: '' }, { label: 'Swim: Halvandet', type: 'swim' }, { label: 'Sanchez 8pm', type: 'anchor' }],
+    sections: [
+      { label: 'Morning — Aarhus', entries: [
+        { icon: '🌊', name: 'Bellevue Strand — Aarhus', note: '4km north of center in Risskov — fine sand, piers, morning dip before the train', badge: 'swim', type: 'swim' },
+        { icon: '🏘', name: 'Open-Air Museum Den Gamle By', note: 'Walking the old town — opens 10am, plan 1.5–2 hours', type: '' },
+      ]},
+      { label: 'Transit', entries: [
+        { icon: '🚂', name: 'Train to Copenhagen', note: 'Leaves every hour at :20 — aim for 12:20 or 1:20', badge: 'transit', type: '' },
+      ]},
+      { label: 'Afternoon — Copenhagen', entries: [
+        { icon: '🏨', name: 'Check in · Hotel SP34', type: '' },
+        { icon: '🖼', name: 'The Design Museum', note: 'Closes 6pm — tight but doable on an early train', type: '' },
+        { icon: '🌊', name: 'Halvandet', note: 'Beach bar + harbour bath close to the city — doubles as pre-dinner drinks', badge: 'swim', type: 'swim' },
+      ]},
+      { label: 'Evening', entries: [
+        { icon: '🌮', name: 'Sanchez', note: '', badge: 'booked', type: 'anchor' },
+        { icon: '🛁', name: 'Sofiebadet / Bathhouse', note: 'If energy allows — or save for tomorrow', type: '' },
+      ]}
+    ]
+  },
+  {
+    id: 5, short: 'Tue', date: '30', month: 'Jun',
+    label: 'Tuesday, June 30', title: 'Copenhagen', sub: 'Louisiana day · Molly departs', hotel: 'Hotel SP34',
+    chips: [{ label: 'Molly departs 4:30pm', type: '' }, { label: 'Louisiana Museum', type: '' }, { label: 'Swim: Charlottenlund or Bellevue', type: 'swim' }],
+    sections: [
+      { label: 'Morning', entries: [
+        { icon: '☕', name: 'Atelier September', note: 'Book ahead', badge: 'bakery', type: '' },
+        { icon: '🛍', name: 'Shopping — Hooha, Packyard', type: '' },
+        { icon: '🛍', name: 'Flea markets', note: "Check what's on Tuesdays", type: '' },
+      ]},
+      { label: 'Midday', entries: [
+        { icon: '✈️', name: 'Molly departs', type: '' },
+      ]},
+      { label: 'Afternoon — Louisiana (leave by 2–2:30pm)', entries: [
+        { icon: '🚂', name: 'S-train to Humlebæk', note: '~1.5 hours each way', badge: 'transit', type: '' },
+        { icon: '🖼', name: 'Louisiana Museum of Art', note: 'The Louisiana Store is excellent — budget time for it', type: '' },
+        { icon: '🌊', name: 'Charlottenlund Sea Bath', note: 'Stop on the S-train line back — open Jun 1–Aug 31, 9am–7pm. Zero detour.', badge: 'swim', type: 'swim' },
+        { icon: '🌊', name: '— or — Bellevue Beach (Klampenborg)', note: 'Same S-train line — 700m white sand, Arne Jacobsen lifeguard towers', badge: 'swim', type: 'swim' },
+      ]},
+      { label: 'Evening', entries: [
+        { icon: '🍜', name: 'Helsingør Street Food', note: 'Right near the train line — casual, perfect solo dinner', type: '' },
+        { icon: '🦌', name: 'Dyrehaven', note: 'Combine with Louisiana if leaving earlier in the day', type: '' },
+      ]}
+    ]
+  },
+  {
+    id: 6, short: 'Wed', date: '1', month: 'Jul',
+    label: 'Wednesday, July 1', title: 'Copenhagen', sub: 'Departure day', hotel: 'Hotel SP34',
+    chips: [{ label: 'Emma departs 12:30pm', type: 'anchor' }],
+    sections: [
+      { label: 'Morning', entries: [
+        { icon: '☕', name: 'Light breakfast, pack', type: '' },
+        { icon: '🏛', name: 'Glyptoteket', note: 'Opens 10am — stunning building even for a quick visit', type: '' },
+        { icon: '✈️', name: 'Emma departs', badge: 'booked', type: 'anchor' },
+      ]}
+    ]
+  }
+];
+
+let currentDay = 0;
+let currentView = 'schedule';
+let checked = {};
+
+function getToday() {
+  const now = new Date();
+  const tripStart = new Date('2026-06-25');
+  const diff = Math.floor((now - tripStart) / (1000 * 60 * 60 * 24));
+  if (diff >= 0 && diff < DAYS.length) return diff;
+  return 0;
+}
+
+function entryKey(dayIdx, sIdx, eIdx) {
+  return `${dayIdx}-${sIdx}-${eIdx}`;
+}
+
+function toggleCheck(dayIdx, sIdx, eIdx) {
+  const key = entryKey(dayIdx, sIdx, eIdx);
+  checked[key] = !checked[key];
+  try { localStorage.setItem('denmark-checked', JSON.stringify(checked)); } catch(e) {}
+  const card = document.querySelector(`[data-key="${key}"]`);
+  if (card) card.classList.toggle('done', checked[key]);
+}
+
+function loadChecked() {
+  try {
+    const saved = localStorage.getItem('denmark-checked');
+    if (saved) checked = JSON.parse(saved);
+  } catch(e) {}
+}
+
+function badgeHTML(type) {
+  if (!type) return '';
+  const map = { swim: 'badge-swim', booked: 'badge-booked', transit: 'badge-transit', bakery: 'badge-bakery' };
+  const labels = { swim: '🌊 swim', booked: '✓ booked', transit: 'train', bakery: '☕ bakery' };
+  return `<span class="entry-badge ${map[type] || ''}">${labels[type] || type}</span>`;
+}
+
+function renderTabs() {
+  const container = document.getElementById('dayTabs');
+  const todayIdx = getToday();
+  container.innerHTML = DAYS.map((d, i) => `
+    <button class="day-tab ${i === currentDay ? 'active' : ''} ${i === todayIdx ? 'today-tab' : ''}"
+      onclick="selectDay(${i})">
+      <span class="tab-day">${d.short}</span>
+      <span class="tab-date">${d.date}</span>
+    </button>
+  `).join('');
+}
+
+function renderDay(dayIdx) {
+  const d = DAYS[dayIdx];
+  const todayIdx = getToday();
+  const isToday = dayIdx === todayIdx;
+
+  let html = `
+    <div class="day-hero">
+      <div class="day-hero-top">
+        <div>
+          <div class="day-hero-label">${d.label}${isToday ? ' · <span style="color:rgba(255,255,255,0.9);font-weight:600">Today</span>' : ''}</div>
+          <div class="day-hero-title">${d.title}</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:3px">${d.sub}</div>
+        </div>
+        <div class="day-hero-hotel">🏨 ${d.hotel}</div>
+      </div>
+      <div class="day-tags">
+        ${d.chips.map(c => `<span class="day-tag ${c.type === 'swim' ? 'swim' : ''}">${c.label}</span>`).join('')}
+      </div>
+    </div>
+  `;
+
+  d.sections.forEach((section, sIdx) => {
+    html += `<div class="section-label">${section.label}</div>`;
+    section.entries.forEach((e, eIdx) => {
+      const key = entryKey(dayIdx, sIdx, eIdx);
+      const isDone = checked[key];
+      const isSwim = e.type === 'swim';
+      const isAnchor = e.type === 'anchor';
+      html += `
+        <div class="entry-card ${isSwim ? 'swim-card' : ''} ${isAnchor ? 'anchor-card' : ''} ${isDone ? 'done' : ''}"
+          data-key="${key}" onclick="toggleCheck(${dayIdx},${sIdx},${eIdx})">
+          <div class="entry-icon">${e.icon}</div>
+          <div class="entry-body">
+            <div class="entry-name">${e.name}</div>
+            ${e.note ? `<div class="entry-note">${e.note}</div>` : ''}
+            ${e.badge ? badgeHTML(e.badge) : ''}
+          </div>
+          <button class="check-btn" onclick="event.stopPropagation();toggleCheck(${dayIdx},${sIdx},${eIdx})" aria-label="Mark done">
+            <svg class="check-icon" viewBox="0 0 12 12" fill="none">
+              <polyline points="1.5,6 5,9.5 10.5,2.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      `;
+    });
+  });
+
+  document.getElementById('dayContent').innerHTML = html;
+}
+
+function renderOverview() {
+  const todayIdx = getToday();
+  let html = DAYS.map((d, i) => {
+    const isToday = i === todayIdx;
+    return `
+      <div class="overview-day" onclick="selectDayFromOverview(${i})">
+        <div class="overview-day-header">
+          <div class="overview-dot">
+            <span style="font-size:9px">${d.short}</span>
+            <span class="d-num">${d.date}</span>
+          </div>
+          <div class="overview-day-info">
+            <div class="overview-day-name">${d.title}${isToday ? '<span class="today-marker">Today</span>' : ''}</div>
+            <div class="overview-day-sub">${d.sub} · ${d.hotel}</div>
+          </div>
+        </div>
+        <div class="overview-day-chips">
+          ${d.chips.map(c => `<span class="overview-chip ${c.type === 'swim' ? 'swim' : c.type === 'anchor' ? 'anchor' : c.type === 'transit' ? 'transit' : ''}">${c.label}</span>`).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('overviewContent').innerHTML = html;
+}
+
+function selectDay(idx) {
+  currentDay = idx;
+  renderTabs();
+  renderDay(idx);
+  if (currentView !== 'schedule') {
+    switchToView('schedule');
+    document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+  }
+  window.scrollTo(0, 0);
+}
+
+function selectDayFromOverview(idx) {
+  currentDay = idx;
+  renderTabs();
+  renderDay(idx);
+  switchToView('schedule');
+  document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+  window.scrollTo(0, 0);
+}
+
+function switchToView(view) {
+  currentView = view;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+}
+
+function switchView(view, btn) {
+  switchToView(view);
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (view === 'overview') renderOverview();
+  window.scrollTo(0, 0);
+}
+
+loadChecked();
+const todayIdx = getToday();
+currentDay = todayIdx;
+renderTabs();
+renderDay(currentDay);
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
