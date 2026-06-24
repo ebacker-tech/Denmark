@@ -816,11 +816,7 @@ currentDay = todayIdx;
 renderTabs();
 renderDay(currentDay);
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/Denmark/sw.js').catch(() => {});
-  });
-}
+
 </script>
 </body>
 </html>
